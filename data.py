@@ -45,6 +45,7 @@ def load_splits():
     df = pd.read_csv(config.CSV_URL)
     # Filter out rows with missing or invalid Fitzpatrick labels (some entries are unlabeled)
     df = df[df["fitzpatrick_scale"].between(1, 6)]
+    df = df.head(300)
 
     train_df, temp_df = train_test_split(
         df, test_size=config.VAL_SPLIT + config.TEST_SPLIT,
