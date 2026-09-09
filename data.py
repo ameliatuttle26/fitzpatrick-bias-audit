@@ -43,9 +43,15 @@ def get_transforms():
 
 def load_splits():
     df = pd.read_csv(config.CSV_URL)
-    # Filter out rows with missing or invalid Fitzpatrick labels (some entries are unlabeled)
+    # Filter out rows with missing or invalid Fitzpatrick labels
     df = df[df["fitzpatrick_scale"].between(1, 6)]
-    df = df.head(300)
+
+    # Only keep rows whose image actually downloaded
+    has_image = df["md5hash"].apply(lambda h: (config.IMAGE_DIR / f"{h}.jpg").exists())
+    dropped = (~has_image).sum()
+    if dropped:
+        print(f"Dropping {dropped} rows with no local image (run download_images.py first if this seems high)")
+    df = df[has_image]
 
     train_df, temp_df = train_test_split(
         df, test_size=config.VAL_SPLIT + config.TEST_SPLIT,
